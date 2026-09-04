@@ -1,0 +1,33 @@
+{{ config(
+    materialized='table',
+    schema='gold'
+) }}
+
+SELECT
+
+    DATE(tweet_timestamp) AS sentiment_date,
+
+    COUNT(DISTINCT tweet_id) AS total_tweets,
+
+    ROUND(AVG(sentiment_score), 4) AS avg_sentiment_score,
+
+    ROUND(AVG(positive_score), 4) AS avg_positive_score,
+
+    ROUND(AVG(negative_score), 4) AS avg_negative_score,
+
+    ROUND(AVG(neutral_score), 4) AS avg_neutral_score,
+
+    SUM(impressions) AS total_impressions,
+
+    SUM(likes) AS total_likes,
+
+    SUM(engagement_count) AS total_engagement,
+
+    ROUND(
+        AVG(engagement_count),
+        2
+    ) AS avg_engagement_per_tweet
+
+FROM {{ ref('silver_sentiments') }}
+
+GROUP BY DATE(tweet_timestamp)
