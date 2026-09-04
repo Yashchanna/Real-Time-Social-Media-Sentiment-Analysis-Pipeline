@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronzelayer
+    database: real-time-sentiment-catlog
+    schema: bronzelayer
+
+    tables:
+      - name: sentiments
+
+      - name: trends
+
+      - name: tweets
+
+      - name: user_metadata
+
+      - name: valid_tweets
