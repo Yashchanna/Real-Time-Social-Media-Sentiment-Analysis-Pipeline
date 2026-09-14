@@ -1,6 +1,6 @@
-![High Level Design](Design/High_level_design.jpeg)
+![High Level Design](Design/highlevel_design.png)
 
-![Low Level Design](Design/Low_level_design.jpeg)
+![Low Level Design](Design/lowlevel_design.png)
 
 # Real-Time Social Media Sentiment Analysis Pipeline
 
