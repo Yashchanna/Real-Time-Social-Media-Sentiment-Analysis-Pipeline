@@ -1,50 +1,78 @@
+![High Level Design](Design/High_level_design.jpeg)
+
+![Low Level Design](Design/Low_level_design.jpeg)
+
 # Real-Time Social Media Sentiment Analysis Pipeline
 
 ## 📌 Introduction
 
-The **Real-Time Social Media Sentiment Analysis Pipeline** is an end-to-end Data Engineering project designed to ingest, process, analyze, and monitor social media data in near real time using **Microsoft Azure, Azure Databricks, PySpark, Delta Lake, and Azure Event Hubs**.
+The **Real-Time Social Media Sentiment Analysis Pipeline** is an
+end-to-end Data Engineering project designed to ingest, process,
+analyze, and monitor social media data in near real time using
+**Microsoft Azure, Azure Databricks, PySpark, Delta Lake, Azure Event
+Hubs, dbt, and Apache Airflow**.
 
-The project demonstrates how raw social media data can be transformed into reliable and business-ready sentiment insights through a **Medallion Architecture consisting of Bronze, Silver, and Gold layers**.
+The project demonstrates how raw social media data can be transformed
+into reliable and business-ready sentiment insights through a
+**Medallion Architecture consisting of Bronze, Silver, and Gold
+layers**.
 
-For this project, the **Twitter Sentiment Analysis Dataset from Kaggle** is used as the source dataset. The historical JSON records are published into **Azure Event Hubs** to simulate a real-time social media streaming environment.
+For this project, the **Twitter Sentiment Analysis Dataset from Kaggle**
+is used as the source dataset. The historical JSON records are published
+into **Azure Event Hubs** to simulate a real-time social media streaming
+environment.
 
-The streaming data is consumed by **Azure Databricks Structured Streaming**, where it is validated, cleaned, transformed, and analyzed using PySpark. Sentiment scores and sentiment categories such as **Positive, Neutral, and Negative** are generated in the Silver layer, while aggregated sentiment trends and business metrics are maintained in the Gold layer.
+The streaming data is consumed by **Azure Databricks Structured
+Streaming**, where it is validated, cleaned, transformed, and analyzed
+using PySpark. Sentiment scores and sentiment categories such as
+**Positive, Neutral, and Negative** are generated in the Silver layer,
+while aggregated sentiment trends and business metrics are maintained in
+the Gold layer.
 
-The pipeline also incorporates **data quality validation, error handling, checkpointing, automated testing with Pytest, orchestration, monitoring, Git integration, and data governance through Unity Catalog**.
+The pipeline also incorporates **data quality validation, error
+handling, checkpointing, automated testing with Pytest, orchestration,
+monitoring, Git integration, and data governance through Unity
+Catalog**.
 
-The primary objective is to build a scalable and production-oriented data pipeline capable of supporting **real-time brand monitoring, customer sentiment analysis, trend detection, and analytical reporting**.
+The primary objective is to build a scalable and production-oriented
+data pipeline capable of supporting **real-time brand monitoring,
+customer sentiment analysis, trend detection, and analytical
+reporting**.
 
----
+------------------------------------------------------------------------
 
 # 🎯 Project Objective
 
-The main objective of this project is to design and implement a scalable real-time data engineering pipeline that:
+The main objective of this project is to design and implement a scalable
+real-time data engineering pipeline that:
 
-* Ingests social media events continuously.
-* Processes streaming JSON data using PySpark.
-* Stores raw events in Delta Lake.
-* Performs data cleansing and validation.
-* Calculates sentiment scores using NLP-based sentiment analysis.
-* Categorizes tweets as Positive, Neutral, or Negative.
-* Generates hourly and daily sentiment trends.
-* Maintains reliable Bronze, Silver, and Gold data layers.
-* Performs data quality checks.
-* Handles corrupt and invalid records.
-* Maintains streaming checkpoints for fault tolerance.
-* Detects unusual sentiment shifts.
-* Generates alerts for pipeline failures and anomalies.
-* Provides analytics-ready data for dashboards and reporting.
-* Demonstrates production-oriented Data Engineering practices.
+-   Ingests social media events continuously.
+-   Processes streaming JSON data using PySpark.
+-   Stores raw events in Delta Lake.
+-   Performs data cleansing and validation.
+-   Calculates sentiment scores using NLP-based sentiment analysis.
+-   Categorizes tweets as Positive, Neutral, or Negative.
+-   Generates hourly and daily sentiment trends.
+-   Maintains reliable Bronze, Silver, and Gold data layers.
+-   Performs data quality checks.
+-   Handles corrupt and invalid records.
+-   Maintains streaming checkpoints for fault tolerance.
+-   Detects unusual sentiment shifts.
+-   Generates alerts for pipeline failures and anomalies.
+-   Provides analytics-ready data for dashboards and reporting.
+-   Demonstrates production-oriented Data Engineering practices.
 
----
+------------------------------------------------------------------------
 
 # 🏗️ Project Architecture
 
-The solution follows a **Medallion Architecture** implemented using Azure Databricks and Delta Lake.
+The solution follows a **Medallion Architecture (Bronze → Silver →
+Gold)** implemented using Azure Databricks, Delta Lake, and **dbt for
+the Gold analytics layer**.
 
 ### High-Level Data Flow
 
-```text
+``` text
 Kaggle Twitter Sentiment Dataset
             │
             ▼
@@ -66,6 +94,7 @@ Kaggle Twitter Sentiment Dataset
             │
             ▼
        Gold Layer
+     dbt Analytics Models
  Sentiment Metrics + Trends
             │
             ├──────────────► Power BI
@@ -75,13 +104,16 @@ Kaggle Twitter Sentiment Dataset
             └──────────────► Alerts & Monitoring
 ```
 
----
+------------------------------------------------------------------------
 
 # 🔷 High-Level Design (HLD)
 
-The High-Level Design represents the major components of the system and how data moves between them.
+The High-Level Design represents the major components of the system and
+how data moves between them, with **Azure Event Hubs** as the real-time
+ingestion layer and **dbt** used for Gold-layer analytics
+transformations.
 
-```text
+``` text
                     ┌──────────────────────────────┐
                     │       DATA SOURCE             │
                     │                              │
@@ -117,37 +149,62 @@ The High-Level Design represents the major components of the system and how data
 
 ### Major HLD Components
 
-| Component            | Responsibility                                               |
-| -------------------- | ------------------------------------------------------------ |
-| Kaggle Dataset       | Historical source data used to simulate social media events  |
-| Azure Event Hubs     | Real-time event ingestion and buffering                      |
-| Azure Databricks     | Distributed processing and streaming computation             |
-| ADLS Gen2            | Cloud storage and Delta Lake underlying storage              |
-| Delta Lake           | Reliable ACID-based storage for Bronze, Silver, and Gold     |
-| Unity Catalog        | Data governance, access control, and lineage                 |
-| Azure Data Factory   | Pipeline orchestration and batch-related workflows           |
-| Databricks Workflows | Streaming job orchestration and scheduling                   |
-| Power BI             | Visualization and business reporting                         |
-| Azure SQL / MySQL    | Optional downstream relational analytics/operational storage |
-| Azure Monitor        | Pipeline and infrastructure monitoring                       |
-| Azure Key Vault      | Secure management of credentials and secrets                 |
-| GitHub               | Version control and collaborative development                |
+  ---------------------------------------------------------------------
+  Component         Responsibility
+  ----------------- ---------------------------------------------------
+  Kaggle Dataset    Historical source data used to simulate social
+                    media events
 
----
+  Azure Event Hubs  Real-time event ingestion and buffering
+
+  Azure Databricks  Distributed processing and streaming computation
+
+  ADLS Gen2         Cloud storage and Delta Lake underlying storage
+
+  Delta Lake        Reliable ACID-based storage for Bronze, Silver, and
+                    Gold
+
+  Unity Catalog     Data governance, access control, and lineage
+
+  Apache Airflow    Pipeline orchestration, scheduling, dependency
+                    management, retries, and monitoring
+
+  Databricks        Databricks job orchestration and scheduling
+  Workflows         
+
+  dbt               Gold-layer transformations, dimensional modeling,
+                    and analytics-ready tables
+
+  Power BI          Visualization and business reporting
+
+  Azure SQL / MySQL Optional downstream relational
+                    analytics/operational storage
+
+  Azure Monitor     Pipeline and infrastructure monitoring
+
+  Azure Key Vault   Secure management of credentials and secrets
+
+  GitHub            Version control and collaborative development
+  ---------------------------------------------------------------------
+
+------------------------------------------------------------------------
 
 # 🔶 Low-Level Design (LLD)
 
-The Low-Level Design explains how individual components process the data internally.
+The Low-Level Design explains how individual components process the data
+internally.
 
 ## 1. Data Ingestion
 
-The Kaggle Twitter Sentiment Analysis dataset is first prepared in JSON format.
+The Kaggle Twitter Sentiment Analysis dataset is first prepared in JSON
+format.
 
-The prepared records are published to **Azure Event Hubs**, which acts as the streaming ingestion layer.
+The prepared records are published to **Azure Event Hubs**, which acts
+as the streaming ingestion layer.
 
 ### Processing Flow
 
-```text
+``` text
 Kaggle JSON
      │
      ▼
@@ -162,42 +219,44 @@ Databricks Structured Streaming
 
 The Databricks streaming job continuously reads events from Event Hubs.
 
-The streaming configuration uses a **10-second micro-batch trigger** to provide near-real-time processing.
+The streaming configuration uses a **10-second micro-batch trigger** to
+provide near-real-time processing.
 
 The ingestion process also captures metadata such as:
 
-* ingestion timestamp
-* source
-* event timestamp
-* partition information
-* user ID
+-   ingestion timestamp
+-   source
+-   event timestamp
+-   partition information
+-   user ID
 
-Checkpointing is maintained in **ADLS Gen2** to provide fault tolerance and prevent unnecessary reprocessing.
+Checkpointing is maintained in **ADLS Gen2** to provide fault tolerance
+and prevent unnecessary reprocessing.
 
----
+------------------------------------------------------------------------
 
-# 2. Bronze Layer — Raw Data
+# 2. Bronze Layer --- Raw Data
 
 The Bronze layer stores the incoming data with minimal transformation.
 
 ### Table
 
-```text
+``` text
 social_catalog.raw.tweet_data
 ```
 
 ### Responsibilities
 
-* Store raw JSON events.
-* Preserve the original source information.
-* Maintain ingestion metadata.
-* Support replay and reprocessing.
-* Handle malformed records separately.
-* Provide an auditable raw data layer.
+-   Store raw JSON events.
+-   Preserve the original source information.
+-   Maintain ingestion metadata.
+-   Support replay and reprocessing.
+-   Handle malformed records separately.
+-   Provide an auditable raw data layer.
 
 ### Example Structure
 
-```text
+``` text
 tweet_id
 user_id
 tweet_text
@@ -209,15 +268,16 @@ raw_payload
 
 The Bronze layer follows an **append-oriented streaming pattern**.
 
----
+------------------------------------------------------------------------
 
-# 3. Silver Layer — Cleaned and Processed Data
+# 3. Silver Layer --- Cleaned and Processed Data
 
-The Silver layer contains validated, cleaned, and enriched tweet records.
+The Silver layer contains validated, cleaned, and enriched tweet
+records.
 
 ### Table
 
-```text
+``` text
 social_catalog.processed.valid_tweets
 ```
 
@@ -225,21 +285,21 @@ social_catalog.processed.valid_tweets
 
 The pipeline performs:
 
-* Null validation.
-* Duplicate removal.
-* Schema validation.
-* Text cleaning.
-* Removal of unwanted URLs.
-* Removal of unnecessary special characters.
-* Whitespace normalization.
-* Timestamp standardization.
-* User ID validation.
-* Sentiment score calculation.
-* Sentiment category assignment.
+-   Null validation.
+-   Duplicate removal.
+-   Schema validation.
+-   Text cleaning.
+-   Removal of unwanted URLs.
+-   Removal of unnecessary special characters.
+-   Whitespace normalization.
+-   Timestamp standardization.
+-   User ID validation.
+-   Sentiment score calculation.
+-   Sentiment category assignment.
 
 ### Sentiment Categories
 
-```text
+``` text
 Positive
 Neutral
 Negative
@@ -247,7 +307,7 @@ Negative
 
 ### Example
 
-```text
+``` text
 Original Tweet:
 "I absolutely love this product! Amazing experience."
 
@@ -260,34 +320,36 @@ Positive
 
 The cleaned and enriched data is written to the Silver Delta table.
 
----
+------------------------------------------------------------------------
 
-# 4. Gold Layer — Analytics
+# 4. Gold Layer --- Analytics (dbt)
 
-The Gold layer contains business-ready aggregated data.
+The Gold layer contains business-ready aggregated data. **dbt** is used
+to transform the validated Silver data into analytics-ready Gold models,
+including fact, dimension, aggregate, and KPI tables.
 
 ### Table
 
-```text
+``` text
 social_catalog.analytics.sentiment_stats
 ```
 
-The Gold layer calculates analytical metrics such as:
+The dbt Gold models calculate analytical metrics such as:
 
-* Total tweets.
-* Average sentiment score.
-* Positive tweet count.
-* Negative tweet count.
-* Neutral tweet count.
-* Positive sentiment percentage.
-* Negative sentiment percentage.
-* Hourly sentiment trends.
-* Daily sentiment trends.
-* Sentiment changes over time.
+-   Total tweets.
+-   Average sentiment score.
+-   Positive tweet count.
+-   Negative tweet count.
+-   Neutral tweet count.
+-   Positive sentiment percentage.
+-   Negative sentiment percentage.
+-   Hourly sentiment trends.
+-   Daily sentiment trends.
+-   Sentiment changes over time.
 
 ### Example
 
-```text
+``` text
 Hour        Total Tweets    Positive %    Neutral %    Negative %
 10:00 AM       1,250          52%          31%          17%
 11:00 AM       1,480          48%          29%          23%
@@ -296,24 +358,50 @@ Hour        Total Tweets    Positive %    Neutral %    Negative %
 
 These aggregated metrics are optimized for analytical consumption.
 
----
+### dbt Gold Transformation Flow
+
+``` text
+Silver Delta Tables
+        │
+        ▼
+   dbt Models
+        │
+        ├── dim_user
+        ├── dim_topic
+        ├── dim_date
+        ├── dim_sentiment
+        ├── fact_socialmedia
+        ├── daily_socialmedia
+        ├── topic_summary
+        ├── country_summary
+        └── executive_dashboard
+        │
+        ▼
+   Gold Delta Tables
+```
+
+dbt is also used to apply SQL-based transformations, data modeling, and
+automated tests to the Gold layer.
+
+------------------------------------------------------------------------
 
 # 5. Sentiment Analysis
 
 Sentiment analysis is performed during the Silver-layer transformation.
 
-The pipeline receives the cleaned tweet text and passes it through the selected NLP sentiment-analysis logic.
+The pipeline receives the cleaned tweet text and passes it through the
+selected NLP sentiment-analysis logic.
 
 The output contains:
 
-```text
+``` text
 sentiment_score
 sentiment_label
 ```
 
 Example:
 
-```text
+``` text
 Tweet:
 "The service was excellent and very fast."
 
@@ -324,9 +412,10 @@ Category:
 Positive
 ```
 
-The sentiment logic is implemented as reusable Python functionality so that it can be independently tested using **Pytest**.
+The sentiment logic is implemented as reusable Python functionality so
+that it can be independently tested using **Pytest**.
 
----
+------------------------------------------------------------------------
 
 # 6. Data Quality Checks
 
@@ -334,29 +423,32 @@ Data quality is an important part of the pipeline.
 
 The project validates:
 
-* Required columns.
-* Null values.
-* Duplicate records.
-* Invalid timestamps.
-* Invalid user IDs.
-* Empty tweet text.
-* Invalid sentiment scores.
-* Schema consistency.
-* Unexpected data types.
+-   Required columns.
+-   Null values.
+-   Duplicate records.
+-   Invalid timestamps.
+-   Invalid user IDs.
+-   Empty tweet text.
+-   Invalid sentiment scores.
+-   Schema consistency.
+-   Unexpected data types.
 
-Data quality rules can be implemented using **PySpark validation logic and Great Expectations-style expectations where applicable**.
+Data quality rules can be implemented using **PySpark validation logic
+and Great Expectations-style expectations where applicable**.
 
-Invalid records are not silently discarded. They are redirected to appropriate error/logging structures for investigation.
+Invalid records are not silently discarded. They are redirected to
+appropriate error/logging structures for investigation.
 
----
+------------------------------------------------------------------------
 
 # 7. Error Handling
 
-The pipeline is designed to handle failures without losing streaming reliability.
+The pipeline is designed to handle failures without losing streaming
+reliability.
 
 ### Error Handling Strategy
 
-```text
+``` text
 Streaming Event
       │
       ▼
@@ -375,43 +467,48 @@ Silver    Error Log
 
 Errors and anomalies are recorded in:
 
-```text
+``` text
 social_catalog.logs.anomaly_log
 ```
 
 The system records information such as:
 
-* Error timestamp.
-* Pipeline/job name.
-* Error type.
-* Error message.
-* Source record information.
-* Processing stage.
+-   Error timestamp.
+-   Pipeline/job name.
+-   Error type.
+-   Error message.
+-   Source record information.
+-   Processing stage.
 
----
+------------------------------------------------------------------------
 
 # 8. Checkpointing
 
-Checkpointing is used to maintain streaming state and recovery information.
+Checkpointing is used to maintain streaming state and recovery
+information.
 
 The checkpoint location is maintained in **ADLS Gen2**.
 
 Conceptually:
 
-```text
+``` text
 Event Hubs
     │
     ▼
 Databricks Streaming
     │
     ├──────────────► Delta Lake
+dbt
+Apache Airflow
     │
     └──────────────► ADLS Gen2 Checkpoint
 ```
 
-If a streaming job fails, checkpoint information allows the pipeline to resume processing from the appropriate point rather than starting from the beginning.
+If a streaming job fails, checkpoint information allows the pipeline to
+resume processing from the appropriate point rather than starting from
+the beginning.
 
----
+------------------------------------------------------------------------
 
 # 9. Data Storage
 
@@ -419,7 +516,7 @@ The underlying cloud storage is **Azure Data Lake Storage Gen2**.
 
 The storage architecture follows:
 
-```text
+``` text
 ADLS Gen2
 │
 ├── Bronze
@@ -437,22 +534,23 @@ ADLS Gen2
 
 Delta Lake provides features such as:
 
-* ACID transactions.
-* Schema enforcement.
-* Schema evolution where required.
-* Time travel.
-* Reliable concurrent reads/writes.
-* Efficient analytical querying.
+-   ACID transactions.
+-   Schema enforcement.
+-   Schema evolution where required.
+-   Time travel.
+-   Reliable concurrent reads/writes.
+-   Efficient analytical querying.
 
----
+------------------------------------------------------------------------
 
 # 10. Unity Catalog
 
-**Unity Catalog** provides centralized governance for the Databricks environment.
+**Unity Catalog** provides centralized governance for the Databricks
+environment.
 
 The project uses the following logical organization:
 
-```text
+``` text
 social_catalog
 │
 ├── raw
@@ -470,43 +568,77 @@ social_catalog
 
 Unity Catalog can be used for:
 
-* Access control.
-* Data discovery.
-* Table governance.
-* Data lineage.
-* Permission management.
-* Centralized metadata management.
+-   Access control.
+-   Data discovery.
+-   Table governance.
+-   Data lineage.
+-   Permission management.
+-   Centralized metadata management.
 
----
+------------------------------------------------------------------------
 
 # 11. Orchestration
 
-The project uses Azure-based orchestration components.
+The project uses **Apache Airflow** and **Databricks Workflows** for
+pipeline orchestration and scheduling.
 
-### Azure Data Factory
+### Apache Airflow
 
-Azure Data Factory can be used for:
+Apache Airflow is used to orchestrate the end-to-end pipeline by
+managing:
 
-* Initial data preparation.
-* Batch ingestion.
-* Dependency management.
-* Trigger-based workflows.
-* Integration with Azure services.
+-   DAG scheduling.
+-   Task dependencies.
+-   Pipeline execution order.
+-   Retry handling.
+-   Pipeline monitoring.
+-   Failure notifications.
+
+A typical orchestration flow is:
+
+``` text
+Airflow DAG
+    │
+    ▼
+Azure Event Hubs
+    │
+    ▼
+Databricks Bronze Streaming
+    │
+    ▼
+Databricks Silver Processing
+    │
+    ▼
+dbt Gold Models
+    │
+    ▼
+Data Quality / Tests
+    │
+    ▼
+Slack Notification
+```
 
 ### Databricks Workflows
 
 Databricks Workflows manage:
 
-* Databricks jobs.
-* Streaming workloads.
-* Transformation tasks.
-* Job dependencies.
-* Retry configuration.
-* Scheduling.
+-   Databricks jobs.
+-   Streaming workloads.
+-   Transformation tasks.
+-   Job dependencies.
+-   Retry configuration.
+-   Scheduling.
 
-For continuous streaming, the Databricks streaming job remains active while the configured micro-batch trigger processes new events.
+For continuous streaming, the Databricks streaming job remains active
+while the configured micro-batch trigger processes new events.
 
----
+### dbt
+
+dbt is executed after the Silver layer to build the analytics-ready Gold
+layer. It manages SQL transformations, model dependencies, tests, and
+the final fact/dimension/aggregate tables.
+
+------------------------------------------------------------------------
 
 # 12. Monitoring and Alerts
 
@@ -514,25 +646,25 @@ Monitoring is implemented using Azure monitoring capabilities.
 
 The pipeline monitors:
 
-* Job failures.
-* Streaming failures.
-* Processing latency.
-* Data quality failures.
-* Unexpected record counts.
-* Sentiment anomalies.
-* Streaming lag.
+-   Job failures.
+-   Streaming failures.
+-   Processing latency.
+-   Data quality failures.
+-   Unexpected record counts.
+-   Sentiment anomalies.
+-   Streaming lag.
 
 ### Sentiment Anomaly Example
 
 If the normal negative sentiment percentage is approximately:
 
-```text
+``` text
 15% – 20%
 ```
 
 and suddenly increases to:
 
-```text
+``` text
 45%
 ```
 
@@ -540,13 +672,14 @@ the pipeline can identify the change as an unusual sentiment shift.
 
 The anomaly can be recorded in:
 
-```text
+``` text
 social_catalog.logs.anomaly_log
 ```
 
-and an alert can be generated through the configured Azure notification/monitoring mechanism.
+and an alert can be generated through the configured Azure
+notification/monitoring mechanism.
 
----
+------------------------------------------------------------------------
 
 # 13. Testing Strategy
 
@@ -554,11 +687,12 @@ Testing is performed using **Pytest** and batch-mode validation.
 
 ## Unit Testing
 
-Individual functions such as sentiment classification and text-cleaning logic are tested independently.
+Individual functions such as sentiment classification and text-cleaning
+logic are tested independently.
 
 Example test scenarios:
 
-```text
+``` text
 Positive tweet → Positive
 Neutral tweet  → Neutral
 Negative tweet → Negative
@@ -568,11 +702,13 @@ Invalid record → Rejected
 
 ## Integration Validation
 
-The historical Kaggle dataset can be processed in batch mode and compared with expected outputs before running the streaming pipeline.
+The historical Kaggle dataset can be processed in batch mode and
+compared with expected outputs before running the streaming pipeline.
 
-This provides confidence that the transformation logic works correctly before being applied to continuous streaming data.
+This provides confidence that the transformation logic works correctly
+before being applied to continuous streaming data.
 
----
+------------------------------------------------------------------------
 
 # 14. Performance Optimization
 
@@ -580,34 +716,36 @@ The pipeline is designed with scalability and performance in mind.
 
 Optimization techniques include:
 
-* Databricks autoscaling.
-* Appropriate partitioning.
-* Delta Lake optimization.
-* Efficient Spark transformations.
-* Avoiding unnecessary shuffles.
-* Proper checkpointing.
-* Incremental processing.
-* Partition pruning.
-* OPTIMIZE where appropriate.
-* Z-ORDER for frequently filtered columns where justified.
-* Caching only frequently reused datasets.
+-   Databricks autoscaling.
+-   Appropriate partitioning.
+-   Delta Lake optimization.
+-   Efficient Spark transformations.
+-   Avoiding unnecessary shuffles.
+-   Proper checkpointing.
+-   Incremental processing.
+-   Partition pruning.
+-   OPTIMIZE where appropriate.
+-   Z-ORDER for frequently filtered columns where justified.
+-   Caching only frequently reused datasets.
 
 Example partitioning strategy:
 
-```text
+``` text
 ingestion_date
 user_id
 ```
 
-The final partition strategy should be selected based on actual query patterns and data volume rather than creating excessive small partitions.
+The final partition strategy should be selected based on actual query
+patterns and data volume rather than creating excessive small
+partitions.
 
----
+------------------------------------------------------------------------
 
 # 15. Data Flow Summary
 
 The complete pipeline can be summarized as:
 
-```text
+``` text
                  SOURCE
                    │
                    ▼
@@ -644,74 +782,83 @@ The complete pipeline can be summarized as:
        Power BI  SQL/MySQL  Alerts
 ```
 
----
+------------------------------------------------------------------------
 
 # 🗂️ Data Layers
 
-| Layer  | Table                                      | Purpose                        |
-| ------ | ------------------------------------------ | ------------------------------ |
-| Bronze | `social_catalog.raw.tweet_data`            | Raw streaming events           |
-| Silver | `social_catalog.processed.valid_tweets`    | Cleaned and enriched tweets    |
-| Gold   | `social_catalog.analytics.sentiment_stats` | Aggregated sentiment analytics |
-| Logs   | `social_catalog.logs.anomaly_log`          | Errors and anomaly information |
+  ---------------------------------------------------------------------------
+  Layer    Table                                        Purpose
+  -------- -------------------------------------------- ---------------------
+  Bronze   `social_catalog.raw.tweet_data`              Raw streaming events
 
----
+  Silver   `social_catalog.processed.valid_tweets`      Cleaned and enriched
+                                                        tweets
+
+  Gold     `social_catalog.analytics.sentiment_stats`   Aggregated sentiment
+                                                        analytics
+
+  Logs     `social_catalog.logs.anomaly_log`            Errors and anomaly
+                                                        information
+  ---------------------------------------------------------------------------
+
+------------------------------------------------------------------------
 
 # 🛠️ Technology Stack
 
 ### Cloud
 
-* Microsoft Azure
-* Azure Event Hubs
-* Azure Data Lake Storage Gen2
-* Azure Data Factory
-* Azure Databricks
-* Azure Monitor
-* Azure Key Vault
+-   Microsoft Azure
+-   Azure Event Hubs
+-   Azure Data Lake Storage Gen2
+-   Azure Databricks
+-   Azure Monitor
+-   Apache Airflow
+-   Azure Key Vault
 
 ### Data Engineering
 
-* Apache Spark
-* PySpark
-* Delta Lake
-* Structured Streaming
-* Medallion Architecture
+-   Apache Spark
+-   PySpark
+-   Delta Lake
+-   Structured Streaming
+-   dbt
+-   Medallion Architecture
 
 ### Programming
 
-* Python
-* SQL
+-   Python
+-   SQL
 
 ### Data Governance
 
-* Unity Catalog
-* Delta Lake
-* Access Control
-* Data Lineage
+-   Unity Catalog
+-   Delta Lake
+-   Access Control
+-   Data Lineage
 
 ### Testing
 
-* Pytest
-* Data Quality Validation
+-   Pytest
+-   Data Quality Validation
 
 ### Database
 
-* MySQL
-* Azure SQL Database where applicable
+-   MySQL
+-   Azure SQL Database where applicable
 
 ### Visualization
 
-* Power BI
-* Databricks SQL
+-   Power BI
+-   Databricks SQL
 
 ### Version Control
 
-* Git
-* GitHub
+-   Git
+-   GitHub
 
----
+------------------------------------------------------------------------
 
----
+------------------------------------------------------------------------
 
 # 🔐 Security Considerations
 
@@ -719,16 +866,17 @@ The pipeline follows secure cloud-data engineering practices.
 
 Sensitive information such as:
 
-* Event Hub connection details.
-* Database credentials.
-* Storage access keys.
-* Service credentials.
+-   Event Hub connection details.
+-   Database credentials.
+-   Storage access keys.
+-   Service credentials.
 
 should not be hardcoded inside notebooks or Python files.
 
-Instead, secrets should be managed using **Azure Key Vault / Databricks secret management** and accessed securely by authorized workloads.
+Instead, secrets should be managed using **Azure Key Vault / Databricks
+secret management** and accessed securely by authorized workloads.
 
----
+------------------------------------------------------------------------
 
 # 📊 Business Use Cases
 
@@ -744,7 +892,8 @@ Large volumes of social media comments can be classified automatically.
 
 ### Crisis Detection
 
-A sudden increase in negative sentiment can indicate a potential product, service, or reputation issue.
+A sudden increase in negative sentiment can indicate a potential
+product, service, or reputation issue.
 
 ### Campaign Monitoring
 
@@ -754,53 +903,53 @@ Marketing teams can evaluate sentiment changes during campaigns.
 
 Organizations can analyze how sentiment changes hourly or daily.
 
----
+------------------------------------------------------------------------
 
 # 🚀 Expected Outcomes
 
-The project demonstrates the ability to build a scalable Data Engineering solution that:
+The project demonstrates the ability to build a scalable Data
+Engineering solution that:
 
-* Processes streaming data using Azure Event Hubs.
-* Uses Databricks Structured Streaming for distributed processing.
-* Implements Bronze, Silver, and Gold Delta Lake architecture.
-* Performs real-time sentiment analysis.
-* Applies data quality and validation rules.
-* Implements fault-tolerant streaming using checkpointing.
-* Uses Unity Catalog for governance.
-* Uses Pytest for transformation testing.
-* Provides monitoring and anomaly detection.
-* Supports analytical consumption through Power BI and SQL.
-* Maintains code through Git/GitHub.
-* Follows production-oriented Data Engineering practices.
+-   Processes streaming data using Azure Event Hubs.
+-   Uses Databricks Structured Streaming for distributed processing.
+-   Implements Bronze, Silver, and Gold Delta Lake architecture.
+-   Performs real-time sentiment analysis.
+-   Applies data quality and validation rules.
+-   Implements fault-tolerant streaming using checkpointing.
+-   Uses Unity Catalog for governance.
+-   Uses Pytest for transformation testing.
+-   Provides monitoring and anomaly detection.
+-   Supports analytical consumption through Power BI and SQL.
+-   Maintains code through Git/GitHub.
+-   Follows production-oriented Data Engineering practices.
 
----
+------------------------------------------------------------------------
 
 # 📈 Future Enhancements
 
 The project can be extended by:
 
-* Connecting additional social media APIs.
-* Implementing advanced NLP models.
-* Adding multilingual sentiment analysis.
-* Implementing topic extraction.
-* Adding real-time Power BI dashboards.
-* Introducing Azure Machine Learning models.
-* Implementing CI/CD pipelines through GitHub Actions or Azure DevOps.
-* Adding data drift and model monitoring.
-* Implementing more advanced anomaly detection.
-* Extending the pipeline to support multiple data sources.
+-   Connecting additional social media APIs.
+-   Implementing advanced NLP models.
+-   Adding multilingual sentiment analysis.
+-   Implementing topic extraction.
+-   Adding real-time Power BI dashboards.
+-   Introducing Azure Machine Learning models.
+-   Implementing CI/CD pipelines through GitHub Actions or Azure DevOps.
+-   Adding data drift and model monitoring.
+-   Implementing more advanced anomaly detection.
+-   Extending the pipeline to support multiple data sources.
 
----
+------------------------------------------------------------------------
 
 # 👨‍💻 Skills Demonstrated
 
 This project demonstrates practical experience with:
 
-```text
+``` text
 Azure Cloud
 Azure Event Hubs
 Azure Data Lake Storage Gen2
-Azure Data Factory
 Azure Databricks
 PySpark
 Python
@@ -819,28 +968,35 @@ Monitoring
 Performance Optimization
 ```
 
----
+------------------------------------------------------------------------
 
 # 🏁 Conclusion
 
-The **Real-Time Social Media Sentiment Analysis Pipeline** demonstrates an end-to-end Azure Data Engineering architecture for transforming continuously arriving social media data into actionable analytical insights.
+The **Real-Time Social Media Sentiment Analysis Pipeline** demonstrates
+an end-to-end Azure Data Engineering architecture for transforming
+continuously arriving social media data into actionable analytical
+insights.
 
-By combining **Azure Event Hubs, Azure Databricks, PySpark, Delta Lake, ADLS Gen2, Unity Catalog, Azure Data Factory, monitoring, automated testing, and Git-based development**, the project demonstrates the complete lifecycle of a modern streaming data pipeline—from ingestion and validation to transformation, sentiment analysis, aggregation, monitoring, and consumption.
+By combining **Azure Event Hubs, Azure Databricks, PySpark, Delta Lake,
+ADLS Gen2, Unity Catalog, dbt, Apache Airflow, monitoring, automated
+testing, and Git-based development**, the project demonstrates the
+complete lifecycle of a modern streaming data pipeline---from ingestion
+and validation to transformation, sentiment analysis, aggregation,
+monitoring, and consumption.
 
-The architecture is designed to be scalable, fault tolerant, testable, and maintainable while following commonly used Data Engineering practices.
+The architecture is designed to be scalable, fault tolerant, testable,
+and maintainable while following commonly used Data Engineering
+practices.
 
----
+------------------------------------------------------------------------
 
 ## ⭐ Project Highlights
 
-> **Real-Time Ingestion** → Azure Event Hubs
-> **Processing** → Azure Databricks + PySpark
-> **Storage** → ADLS Gen2 + Delta Lake
-> **Architecture** → Bronze → Silver → Gold
-> **Governance** → Unity Catalog
-> **Orchestration** → Azure Data Factory + Databricks Workflows
-> **Testing** → Pytest
-> **Monitoring** → Azure Monitor
-> **Analytics** → Power BI / Databricks SQL
-> **Version Control** → Git + GitHub
-> **Business Objective** → Real-Time Social Media Sentiment Monitoring
+> **Real-Time Ingestion** → Azure Event Hubs **Processing** → Azure
+> Databricks + PySpark **Transformation** → dbt Gold Models **Storage**
+> → ADLS Gen2 + Delta Lake **Architecture** → Bronze → Silver → Gold
+> **Governance** → Unity Catalog **Orchestration** → Apache Airflow +
+> Databricks Workflows **Testing** → Pytest **Monitoring** → Azure
+> Monitor **Analytics** → Power BI / Databricks SQL **Version Control**
+> → Git + GitHub **Business Objective** → Real-Time Social Media
+> Sentiment Monitoring
